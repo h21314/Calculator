@@ -27,4 +27,10 @@ public interface ICalculatorManagerService {
      * redo操作
      */
     void redo();
+
+    /**
+     * 获取结果
+     * @return
+     */
+    BigDecimal getResult();
 }

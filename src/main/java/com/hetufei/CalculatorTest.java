@@ -6,72 +6,268 @@ import com.hetufei.service.ICalculatorManagerService;
 import com.hetufei.service.impl.CalculatorManagerServiceImpl;
 
 import java.math.BigDecimal;
+import java.util.PrimitiveIterator;
 
 /**
  * 计算器测试入口类
  * @author hetufei
  */
 public class CalculatorTest {
+
+    private static final String ERROR_MESSAGE = "division can not be zero";
+
     public static void main(String[] args) {
 
-        Calculator calculator = new Calculator();
-        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        //校验简单加法
+        verifySimpleAdd();
 
-        calculatorManager.execute(BigDecimal.valueOf(1), OperatorEnum.ADD);
-        System.out.println("result=" + calculator.getResult());
+        //校验简单减法
+        verifySimpleSubtract();
 
-        calculatorManager.execute(BigDecimal.valueOf(5), OperatorEnum.ADD);
-        System.out.println("result=" + calculator.getResult());
+        //校验简单乘法
+        verifySimpleMultiply();
 
-        calculatorManager.execute(BigDecimal.valueOf(2), OperatorEnum.SUBTRACT);
-        System.out.println("result=" + calculator.getResult());
+        //校验简单除法
+        verifySimpleDivide();
 
-        calculatorManager.execute(BigDecimal.valueOf(4), OperatorEnum.MULTIPLY);
-        System.out.println("result=" + calculator.getResult());
+        //校验简单除法，被除数为0
+        verifySimpleDivideWhenDivisionIsZero();
 
-        calculatorManager.execute(BigDecimal.valueOf(2), OperatorEnum.DIVIDE);
-        System.out.println("result=" + calculator.getResult());
+        //校验简单除法，无法整除。
+        verifyDivideScale();
+
+        //校验组合运算，加减乘除
+        verifyComplexOperate();
+
+        //组合运算，加减乘除。进行一次undo、redo操作
+        verifyComplexOperateWithUndoAndRedoOnce();
+
+        //组合运算，加减乘除。进行多次undo、redo操作
+        verifyComplexOperateWithUndoAndRedoMulti();
+
+        //组合运算，加减乘除。只有redo操作
+        verifyComplexOperateWithRedoOnly();
 
 
-        calculatorManager.redo();
-        System.out.println("first redo result = " + calculator.getResult());
+        System.out.println("恭喜，所有测试用例已通过！");
 
 
-        calculatorManager.redo();
-        System.out.println("second redo result = " + calculator.getResult());
-
-        calculatorManager.undo();
-        System.out.println("undo first result = " + calculator.getResult());
-
-        calculatorManager.undo();
-        System.out.println("undo second result = " + calculator.getResult());
-
-        calculatorManager.redo();
-        System.out.println("redo second result = " + calculator.getResult());
-
-        calculatorManager.redo();
-        System.out.println("redo second result = " + calculator.getResult());
     }
 
-    //正常加减乘除，四个简单用例，其中除法2个
+    /**
+     * 验证简单加法操作
+     */
+    private static void verifySimpleAdd(){
+        Calculator calculator = new Calculator();
+        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+        assert equals(calculatorManager.getResult(),new BigDecimal(10));
+    }
 
-    //一个加减乘除都有的case
+    /**
+     * 验证简单减法操作
+     */
+    private static void verifySimpleSubtract(){
+        Calculator calculator = new Calculator();
+        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.SUBTRACT);
+        assert equals(calculatorManager.getResult(),new BigDecimal(-10));
+    }
 
-    //加减乘除，单undo
+    /**
+     * 验证简单乘法操作
+     */
+    private static void verifySimpleMultiply(){
+        Calculator calculator = new Calculator();
+        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.MULTIPLY);
+        //第一次相当于0*10，所以结果还是等于0
+        assert equals(calculatorManager.getResult(),BigDecimal.ZERO);
 
-    //加减乘除，单undo+redo
+        calculatorManager.execute(new BigDecimal(1), OperatorEnum.ADD);
+        calculatorManager.execute(new BigDecimal(6), OperatorEnum.MULTIPLY);
+        assert equals(calculatorManager.getResult(),new BigDecimal(6));
+    }
 
-    //加减乘除，只有redo
 
-    //加减乘除，只有redo+undo
+    /**
+     * 验证简单除法操作
+     */
+    private static void verifySimpleDivide(){
+        Calculator calculator = new Calculator();
+        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.DIVIDE);
+        assert equals(calculatorManager.getResult(),new BigDecimal(0));
 
-    //加减乘除，只有redo+undo
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+        calculatorManager.execute(new BigDecimal(2), OperatorEnum.DIVIDE);
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+    }
 
-    //加减乘除，double undo
 
-    //加减乘除，double undo + double redo
+    /**
+     * 验证简单除法操作，被除数为0
+     * 异常case
+     */
+    private static void verifySimpleDivideWhenDivisionIsZero(){
+        try {
+            Calculator calculator = new Calculator();
+            ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+            calculatorManager.execute(new BigDecimal(10), OperatorEnum.DIVIDE);
+            assert calculatorManager.getResult().compareTo(BigDecimal.ZERO) == 0;
 
-    //加减乘除，double undo + three redo
+            calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+            calculatorManager.execute(new BigDecimal(0), OperatorEnum.DIVIDE);
+        } catch (Exception e) {
+            //校验被除数为0的场景，抛的异常为IllegalArgumentException
+            assert e instanceof IllegalArgumentException;
+            //校验被除数为0的场景，校验抛的异常描述信息是否相等
+            assert ERROR_MESSAGE.equalsIgnoreCase(e.getMessage());
+        }
+
+    }
+
+    /**
+     * 验证复合操作，加减乘除
+     */
+    private static void verifyComplexOperate(){
+        Calculator calculator = new Calculator();
+        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+        assert equals(calculatorManager.getResult(),new BigDecimal(10));
+
+        calculatorManager.execute(new BigDecimal(2), OperatorEnum.MULTIPLY);
+        assert equals(calculatorManager.getResult(),new BigDecimal(20));
+
+        calculatorManager.execute(new BigDecimal(4), OperatorEnum.DIVIDE);
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+
+        calculatorManager.execute(new BigDecimal(2), OperatorEnum.SUBTRACT);
+        assert equals(calculatorManager.getResult(),new BigDecimal(3));
+
+    }
+
+
+    /**
+     * 验证复合操作，加减乘除,验证一次undo、redo操作
+     */
+    private static void verifyComplexOperateWithUndoAndRedoOnce(){
+        Calculator calculator = new Calculator();
+        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+        assert equals(calculatorManager.getResult(),new BigDecimal(10));
+
+        calculatorManager.execute(new BigDecimal(2), OperatorEnum.MULTIPLY);
+        assert equals(calculatorManager.getResult(),new BigDecimal(20));
+
+        calculatorManager.execute(new BigDecimal(4), OperatorEnum.DIVIDE);
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+
+        calculatorManager.execute(new BigDecimal(2), OperatorEnum.SUBTRACT);
+        assert equals(calculatorManager.getResult(),new BigDecimal(3));
+
+        calculatorManager.undo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+
+        calculatorManager.redo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(3));
+
+    }
+
+
+    /**
+     * 验证复合操作，加减乘除,验证多次undo、redo操作
+     */
+    private static void verifyComplexOperateWithUndoAndRedoMulti(){
+        Calculator calculator = new Calculator();
+        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+        assert equals(calculatorManager.getResult(),new BigDecimal(10));
+
+        calculatorManager.execute(new BigDecimal(2), OperatorEnum.MULTIPLY);
+        assert equals(calculatorManager.getResult(),new BigDecimal(20));
+
+        calculatorManager.execute(new BigDecimal(4), OperatorEnum.DIVIDE);
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+
+        calculatorManager.execute(new BigDecimal(2), OperatorEnum.SUBTRACT);
+        assert equals(calculatorManager.getResult(),new BigDecimal(3));
+
+        calculatorManager.undo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+
+        calculatorManager.undo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(20));
+
+        calculatorManager.redo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+
+        calculatorManager.redo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(3));
+
+        calculatorManager.undo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+    }
+
+
+    /**
+     * 验证复合操作，加减乘除,验证仅redo操作，如果没有undo操作的话，redoStack为空，此时返回的是之前的值
+     */
+    private static void verifyComplexOperateWithRedoOnly(){
+        Calculator calculator = new Calculator();
+        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+        assert equals(calculatorManager.getResult(),new BigDecimal(10));
+
+        calculatorManager.execute(new BigDecimal(2), OperatorEnum.MULTIPLY);
+        assert equals(calculatorManager.getResult(),new BigDecimal(20));
+
+        calculatorManager.execute(new BigDecimal(4), OperatorEnum.DIVIDE);
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+
+        calculatorManager.execute(new BigDecimal(2), OperatorEnum.SUBTRACT);
+        assert equals(calculatorManager.getResult(),new BigDecimal(3));
+
+        calculatorManager.redo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(3));
+
+        calculatorManager.redo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(3));
+
+    }
+
+    /**
+     * 校验除法，当无法整除时，保留3位有效数字
+     */
+    private static void verifyDivideScale(){
+        Calculator calculator = new Calculator();
+        ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        //0 + 10
+        calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+        assert equals(calculatorManager.getResult(),new BigDecimal(10));
+
+        // 10 / 3
+        calculatorManager.execute(new BigDecimal(3), OperatorEnum.DIVIDE);
+        assert equals(calculatorManager.getResult().setScale(3),new BigDecimal("3.333"));
+
+    }
+
+
+    /**
+     * 判断BigDecimal值是否相等
+     * @param origin
+     * @param source
+     * @return
+     */
+    private static boolean equals(BigDecimal origin, BigDecimal source) {
+        if (origin == null && source == null) {
+            return true;
+        }
+        if (origin == null || source == null) {
+            return false;
+        }
+        return origin.compareTo(source) == 0;
+    }
 
 
 }

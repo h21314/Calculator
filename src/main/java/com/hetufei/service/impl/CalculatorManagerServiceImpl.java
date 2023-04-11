@@ -49,29 +49,6 @@ public class CalculatorManagerServiceImpl implements ICalculatorManagerService {
         }
     }
 
-
-    /**
-     * 根据操作类型获取相应的操作指令
-     * @param calculator 计算器对象
-     * @param operateValue 被操作数
-     * @param operatorEnum 操作类型
-     * @return @see main.java.com.hetufei.command.Command
-     */
-    private Command getCommand(Calculator calculator,BigDecimal operateValue, OperatorEnum operatorEnum){
-        switch (operatorEnum) {
-            case ADD:
-                return new AddCommand(calculator, operateValue);
-            case SUBTRACT:
-                return new SubtractCommand(calculator, operateValue);
-            case MULTIPLY:
-                return new MultiplyCommand(calculator,operateValue);
-            case DIVIDE:
-                return new DivideCommand(calculator, operateValue);
-            default:
-                throw new IllegalArgumentException("this operation not support yet! ");
-        }
-    }
-
     /**
      * 执行undo操作
      */
@@ -100,5 +77,32 @@ public class CalculatorManagerServiceImpl implements ICalculatorManagerService {
         UndoCommand command = redoStack.pop();
         undoStack.push(command);
         command.execute();
+    }
+
+    @Override
+    public BigDecimal getResult() {
+        return calculator.getResult();
+    }
+
+    /**
+     * 根据操作类型获取相应的操作指令
+     * @param calculator 计算器对象
+     * @param operateValue 被操作数
+     * @param operatorEnum 操作类型
+     * @return @see main.java.com.hetufei.command.Command
+     */
+    private Command getCommand(Calculator calculator,BigDecimal operateValue, OperatorEnum operatorEnum){
+        switch (operatorEnum) {
+            case ADD:
+                return new AddCommand(calculator, operateValue);
+            case SUBTRACT:
+                return new SubtractCommand(calculator, operateValue);
+            case MULTIPLY:
+                return new MultiplyCommand(calculator,operateValue);
+            case DIVIDE:
+                return new DivideCommand(calculator, operateValue);
+            default:
+                throw new IllegalArgumentException("this operation not support yet! ");
+        }
     }
 }
