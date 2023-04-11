@@ -47,7 +47,6 @@ public class CalculatorManagerServiceImpl implements ICalculatorManagerService {
             //计算成功，则清空redo
             redoStack.clear();
         }
-//        return calculator.getResult();
     }
 
 
