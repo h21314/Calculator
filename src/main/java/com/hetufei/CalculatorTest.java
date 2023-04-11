@@ -207,6 +207,13 @@ public class CalculatorTest {
 
         calculatorManager.undo();
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
+
+        calculatorManager.execute(new BigDecimal(4), OperatorEnum.ADD);
+        assert equals(calculatorManager.getResult(),new BigDecimal(9));
+
+        calculatorManager.redo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(9));
+
     }
 
 
