@@ -15,7 +15,6 @@ public interface ICalculatorManagerService {
      * 执行指令
      * @param operateValue 被操作数
      * @param operatorEnum 操作类型
-     * @return 计算结果
      */
     void execute(BigDecimal operateValue, OperatorEnum operatorEnum);
 
