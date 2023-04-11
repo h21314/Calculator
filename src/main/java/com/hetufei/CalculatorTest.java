@@ -60,6 +60,7 @@ public class CalculatorTest {
     private static void verifySimpleAdd(){
         Calculator calculator = new Calculator();
         ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        // 0 + 10 = 10
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
         assert equals(calculatorManager.getResult(),new BigDecimal(10));
     }
@@ -70,6 +71,7 @@ public class CalculatorTest {
     private static void verifySimpleSubtract(){
         Calculator calculator = new Calculator();
         ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        // 0 - 10 = -10
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.SUBTRACT);
         assert equals(calculatorManager.getResult(),new BigDecimal(-10));
     }
@@ -80,11 +82,14 @@ public class CalculatorTest {
     private static void verifySimpleMultiply(){
         Calculator calculator = new Calculator();
         ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        // 0 * 10 = 0
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.MULTIPLY);
         //第一次相当于0*10，所以结果还是等于0
         assert equals(calculatorManager.getResult(),BigDecimal.ZERO);
 
+        // 0 + 1 = 1
         calculatorManager.execute(new BigDecimal(1), OperatorEnum.ADD);
+        // 1 * 6 = 6
         calculatorManager.execute(new BigDecimal(6), OperatorEnum.MULTIPLY);
         assert equals(calculatorManager.getResult(),new BigDecimal(6));
     }
@@ -96,10 +101,13 @@ public class CalculatorTest {
     private static void verifySimpleDivide(){
         Calculator calculator = new Calculator();
         ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        // 0 / 10 = 0
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.DIVIDE);
         assert equals(calculatorManager.getResult(),new BigDecimal(0));
 
+        // 0 + 10 = 10
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+        // 10 / 2 = 5
         calculatorManager.execute(new BigDecimal(2), OperatorEnum.DIVIDE);
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
     }
@@ -113,10 +121,13 @@ public class CalculatorTest {
         try {
             Calculator calculator = new Calculator();
             ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+            // 0 / 10 = 0
             calculatorManager.execute(new BigDecimal(10), OperatorEnum.DIVIDE);
             assert calculatorManager.getResult().compareTo(BigDecimal.ZERO) == 0;
 
+            // 0 + 10 = 10
             calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
+            // 10 / 0
             calculatorManager.execute(new BigDecimal(0), OperatorEnum.DIVIDE);
         } catch (Exception e) {
             //校验被除数为0的场景，抛的异常为IllegalArgumentException
@@ -133,15 +144,19 @@ public class CalculatorTest {
     private static void verifyComplexOperate(){
         Calculator calculator = new Calculator();
         ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        // 0 + 10 = 10
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
         assert equals(calculatorManager.getResult(),new BigDecimal(10));
 
+        // 10 * 2 = 20
         calculatorManager.execute(new BigDecimal(2), OperatorEnum.MULTIPLY);
         assert equals(calculatorManager.getResult(),new BigDecimal(20));
 
+        // 20 / 4 = 5
         calculatorManager.execute(new BigDecimal(4), OperatorEnum.DIVIDE);
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
 
+        // 5 - 2 = 3
         calculatorManager.execute(new BigDecimal(2), OperatorEnum.SUBTRACT);
         assert equals(calculatorManager.getResult(),new BigDecimal(3));
 
@@ -154,21 +169,27 @@ public class CalculatorTest {
     private static void verifyComplexOperateWithUndoAndRedoOnce(){
         Calculator calculator = new Calculator();
         ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        // 0 + 10 = 10
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
         assert equals(calculatorManager.getResult(),new BigDecimal(10));
 
+        // 10 * 2 = 20
         calculatorManager.execute(new BigDecimal(2), OperatorEnum.MULTIPLY);
         assert equals(calculatorManager.getResult(),new BigDecimal(20));
 
+        // 20 / 4 = 5
         calculatorManager.execute(new BigDecimal(4), OperatorEnum.DIVIDE);
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
 
+        // 5 - 2 = 3
         calculatorManager.execute(new BigDecimal(2), OperatorEnum.SUBTRACT);
         assert equals(calculatorManager.getResult(),new BigDecimal(3));
 
+        //undo操作，3 -> 5
         calculatorManager.undo();
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
 
+        //redo操作,5 -> 3
         calculatorManager.redo();
         assert equals(calculatorManager.getResult(),new BigDecimal(3));
 
@@ -181,36 +202,51 @@ public class CalculatorTest {
     private static void verifyComplexOperateWithUndoAndRedoMulti(){
         Calculator calculator = new Calculator();
         ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        // 0 + 10 = 10
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
         assert equals(calculatorManager.getResult(),new BigDecimal(10));
 
+        // 10 * 2 = 20
         calculatorManager.execute(new BigDecimal(2), OperatorEnum.MULTIPLY);
         assert equals(calculatorManager.getResult(),new BigDecimal(20));
 
+        // 20 / 4 = 5
         calculatorManager.execute(new BigDecimal(4), OperatorEnum.DIVIDE);
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
 
+        // 5 - 2 = 3
         calculatorManager.execute(new BigDecimal(2), OperatorEnum.SUBTRACT);
         assert equals(calculatorManager.getResult(),new BigDecimal(3));
 
+        //undo操作，3 -> 5
         calculatorManager.undo();
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
 
+        // undo操作，5 -> 20
         calculatorManager.undo();
         assert equals(calculatorManager.getResult(),new BigDecimal(20));
 
+        //redo操作，20 -> 5
         calculatorManager.redo();
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
 
+        //redo操作，5 -> 3
         calculatorManager.redo();
         assert equals(calculatorManager.getResult(),new BigDecimal(3));
 
+        // undo操作，3 -> 5
         calculatorManager.undo();
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
 
+        //add操作，5 + 4 = 9
         calculatorManager.execute(new BigDecimal(4), OperatorEnum.ADD);
         assert equals(calculatorManager.getResult(),new BigDecimal(9));
 
+        //undo操作，9 -> 5
+        calculatorManager.undo();
+        assert equals(calculatorManager.getResult(),new BigDecimal(5));
+
+        //redo操作, 5 -> 9
         calculatorManager.redo();
         assert equals(calculatorManager.getResult(),new BigDecimal(9));
 
@@ -223,21 +259,27 @@ public class CalculatorTest {
     private static void verifyComplexOperateWithRedoOnly(){
         Calculator calculator = new Calculator();
         ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
+        // 0 + 10 = 10
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
         assert equals(calculatorManager.getResult(),new BigDecimal(10));
 
+        // 10 * 2 = 20
         calculatorManager.execute(new BigDecimal(2), OperatorEnum.MULTIPLY);
         assert equals(calculatorManager.getResult(),new BigDecimal(20));
 
+        //20 / 4 = 5
         calculatorManager.execute(new BigDecimal(4), OperatorEnum.DIVIDE);
         assert equals(calculatorManager.getResult(),new BigDecimal(5));
 
+        // 5 - 2 = 3
         calculatorManager.execute(new BigDecimal(2), OperatorEnum.SUBTRACT);
         assert equals(calculatorManager.getResult(),new BigDecimal(3));
 
+        //redo不生效，result=3
         calculatorManager.redo();
         assert equals(calculatorManager.getResult(),new BigDecimal(3));
 
+        //redo不生效，result=3
         calculatorManager.redo();
         assert equals(calculatorManager.getResult(),new BigDecimal(3));
 
@@ -249,11 +291,11 @@ public class CalculatorTest {
     private static void verifyDivideScale(){
         Calculator calculator = new Calculator();
         ICalculatorManagerService calculatorManager = new CalculatorManagerServiceImpl(calculator);
-        //0 + 10
+        //0 + 10 = 10
         calculatorManager.execute(new BigDecimal(10), OperatorEnum.ADD);
         assert equals(calculatorManager.getResult(),new BigDecimal(10));
 
-        // 10 / 3
+        // 10 / 3 = 3.333
         calculatorManager.execute(new BigDecimal(3), OperatorEnum.DIVIDE);
         assert equals(calculatorManager.getResult().setScale(3),new BigDecimal("3.333"));
 
