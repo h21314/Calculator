@@ -21,7 +21,7 @@ public class DivideOperateStrategy implements IOperateStrategy{
         if (operateValue.compareTo(BigDecimal.ZERO) == 0) {
             throw new IllegalArgumentException("division can not be zero");
         }
-        return calculator.getResult().divide(operateValue).setScale(3, RoundingMode.HALF_UP);
+        return calculator.getResult().divide(operateValue,3,RoundingMode.HALF_UP);
 
     }
 }

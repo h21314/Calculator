@@ -7,6 +7,10 @@ import com.hetufei.service.impl.CalculatorManagerServiceImpl;
 
 import java.math.BigDecimal;
 
+/**
+ * 计算器测试入口类
+ * @author hetufei
+ */
 public class CalculatorTest {
     public static void main(String[] args) {
 
@@ -25,7 +29,7 @@ public class CalculatorTest {
         calculatorManager.execute(BigDecimal.valueOf(4), OperatorEnum.MULTIPLY);
         System.out.println("result=" + calculator.getResult());
 
-        calculatorManager.execute(BigDecimal.valueOf(0), OperatorEnum.DIVIDE);
+        calculatorManager.execute(BigDecimal.valueOf(2), OperatorEnum.DIVIDE);
         System.out.println("result=" + calculator.getResult());
 
 

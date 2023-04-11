@@ -28,13 +28,9 @@ public enum OperatorEnum {
 
     ;
 
-    public String getCode() {
-        return code;
-    }
+    private final String code;
 
-    private String code;
-
-    private String desc;
+    private final String desc;
 
     OperatorEnum(String code,String desc){
         this.code = code;

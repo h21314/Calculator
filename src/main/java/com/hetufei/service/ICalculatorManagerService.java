@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 /**
  * 计算器管理接口
+ * @author hetufei
  */
 public interface ICalculatorManagerService {
 
@@ -16,7 +17,7 @@ public interface ICalculatorManagerService {
      * @param operatorEnum 操作类型
      * @return 计算结果
      */
-    BigDecimal execute(BigDecimal operateValue, OperatorEnum operatorEnum);
+    void execute(BigDecimal operateValue, OperatorEnum operatorEnum);
 
     /**
      * undo操作

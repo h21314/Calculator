@@ -25,14 +25,19 @@ public class CalculatorManagerServiceImpl implements ICalculatorManagerService {
      */
     private Stack<UndoCommand> redoStack = new Stack<>();
 
+    /**
+     * 计算器对象
+     */
+    private final Calculator calculator;
+
     public CalculatorManagerServiceImpl(Calculator calculator) {
         this.calculator = calculator;
     }
 
-    private Calculator calculator;
+
 
     @Override
-    public BigDecimal execute(BigDecimal operateValue, OperatorEnum operatorEnum) {
+    public void execute(BigDecimal operateValue, OperatorEnum operatorEnum) {
         Command command = getCommand(calculator, operateValue, operatorEnum);
         if (command instanceof UndoCommand) {
             undoStack.push((UndoCommand) command);
@@ -42,7 +47,7 @@ public class CalculatorManagerServiceImpl implements ICalculatorManagerService {
             //计算成功，则清空redo
             redoStack.clear();
         }
-        return calculator.getResult();
+//        return calculator.getResult();
     }
 
 

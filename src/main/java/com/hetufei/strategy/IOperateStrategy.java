@@ -10,5 +10,5 @@ import java.math.BigDecimal;
  */
 public interface IOperateStrategy {
 
-    public BigDecimal calculate(BigDecimal operateValue, Calculator calculator);
+    BigDecimal calculate(BigDecimal operateValue, Calculator calculator);
 }
